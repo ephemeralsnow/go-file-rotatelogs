@@ -157,8 +157,15 @@ func (rl *RotateLogs) Rotate(filename string) error {
 	}()
 
 	if rl.LinkName != "" {
+		linkTarget := filename
+		if !filepath.IsAbs(rl.LinkName) {
+			linkTarget, err = filepath.Rel(filepath.Dir(rl.LinkName), filename)
+			if err != nil {
+				return err
+			}
+		}
 		tmpLinkName := fmt.Sprintf("%s_symlink", filename)
-		err = os.Symlink(filename, tmpLinkName)
+		err = os.Symlink(linkTarget, tmpLinkName)
 		if err != nil {
 			return err
 		}
